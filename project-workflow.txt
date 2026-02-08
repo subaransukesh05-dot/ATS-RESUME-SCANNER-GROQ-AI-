@@ -1,0 +1,227 @@
+PROJECT: ATS Resume Scanner (AWS + Streamlit + Groq AI)
+PURPOSE: Analyze resumes against job descriptions using AI (ATS-style analysis)
+
+=====================================================
+PHASE 1: AWS EC2 SETUP
+=====================================================
+
+WHY:
+We need a cloud server to host the Streamlit application so it can be accessed publicly.
+
+WHEN:
+This is the FIRST step before any application setup.
+
+STEPS:
+1. Launch an EC2 instance
+   - OS: Ubuntu Server 24.04 LTS
+   - Instance type: t2.micro (sufficient for demo)
+   - Key pair: create or use existing
+
+2. Configure Security Group (Inbound Rules)
+   - SSH (22) → Your IP only
+   - Custom TCP (8501) → 0.0.0.0/0 (Streamlit)
+
+=====================================================
+PHASE 2: CONNECT TO EC2 & SYSTEM SETUP
+=====================================================
+
+WHY:
+Install system-level dependencies required to run Python and handle PDFs.
+
+WHEN:
+Immediately after EC2 launch.
+
+COMMANDS:
+
+1. Connect to EC2
+   ssh -i key.pem ubuntu@<EC2_PUBLIC_IP>
+
+2. Update system
+   sudo apt update && sudo apt upgrade -y
+
+3. Install required system packages
+   sudo apt install python3 python3-pip python3-venv git poppler-utils -y
+
+NOTE:
+- poppler-utils is REQUIRED for pdf2image
+- Do NOT skip this step
+
+=====================================================
+PHASE 3: PROJECT SETUP
+=====================================================
+
+WHY:
+Clone project code and isolate dependencies using virtual environment.
+
+WHEN:
+After system dependencies are installed.
+
+COMMANDS:
+
+1. Clone the repository
+   git clone https://github.com/CloudDevOpsHub/Application-Tracking-System.git
+
+2. Enter project directory
+   cd Application-Tracking-System
+
+3. Create Python virtual environment
+   python3 -m venv venv
+
+4. Activate virtual environment
+   source venv/bin/activate
+
+EXPECTED:
+Terminal prompt should show:
+(venv) ubuntu@...
+
+=====================================================
+PHASE 4: PYTHON DEPENDENCIES
+=====================================================
+
+WHY:
+Install only required Python libraries for the project.
+
+WHEN:
+After activating the virtual environment.
+
+FILES:
+requirements.txt (updated)
+
+CONTENT:
+streamlit
+groq
+pdf2image
+Pillow
+
+COMMANDS:
+
+1. Upgrade pip
+   pip install --upgrade pip
+
+2. Install dependencies
+   pip install -r requirements.txt
+
+=====================================================
+PHASE 5: GROQ API CONFIGURATION
+=====================================================
+
+WHY:
+Securely store the Groq API key without hardcoding it.
+
+WHEN:
+Before running the application.
+
+COMMANDS:
+
+1. Create Streamlit secrets directory
+   mkdir -p .streamlit
+
+2. Create secrets file
+   nano .streamlit/secrets.toml
+
+CONTENT:
+GROQ_API_KEY = "gsk_your_actual_api_key_here"
+
+SAVE:
+CTRL + O → ENTER → CTRL + X
+
+IMPORTANT:
+- Never commit this file to GitHub
+- Streamlit automatically reads this file
+
+=====================================================
+PHASE 6: APPLICATION CODE
+=====================================================
+
+WHY:
+This contains the core logic for ATS analysis using Groq AI.
+
+WHEN:
+After dependencies and secrets are configured.
+
+FILE:
+app.py
+
+MODEL USED:
+llama-3.1-8b-instant (stable Groq model)
+
+FEATURES:
+- Resume upload (PDF)
+- Job description input
+- Resume evaluation
+- Keyword extraction (JSON)
+- ATS percentage match
+
+(NO COMMANDS — just ensure app.py is updated correctly)
+
+=====================================================
+PHASE 7: RUN THE APPLICATION
+=====================================================
+
+WHY:
+Start the Streamlit server and expose it publicly.
+
+WHEN:
+After app.py and secrets are ready.
+
+COMMAND:
+
+streamlit run app.py \
+  --server.address 0.0.0.0 \
+  --server.port 8501
+
+EXPECTED OUTPUT:
+You can now view your Streamlit app in your browser.
+External URL: http://<EC2_PUBLIC_IP>:8501
+
+=====================================================
+PHASE 8: ACCESS THE APPLICATION
+=====================================================
+
+WHY:
+Verify that the app is live and working.
+
+WHEN:
+After Streamlit starts successfully.
+
+BROWSER URL:
+http://<EC2_PUBLIC_IP>:8501
+
+TEST FLOW:
+1. Paste a Job Description
+2. Upload Resume (PDF)
+3. Click:
+   - Tell Me About the Resume
+   - Get Keywords
+   - Percentage Match
+
+=====================================================
+PHASE 9: COMMON OPERATIONS
+=====================================================
+
+STOP THE APP:
+CTRL + C
+
+RESTART THE APP:
+streamlit run app.py --server.address 0.0.0.0 --server.port 8501
+
+ACTIVATE VENV (after logout/login):
+cd Application-Tracking-System
+source venv/bin/activate
+
+CHECK INSTALLED PACKAGES:
+pip list
+
+=====================================================
+PHASE 10: PROJECT SUMMARY (FOR INTERVIEWS)
+=====================================================
+
+"I deployed an AI-powered ATS Resume Scanner on AWS EC2 using Streamlit
+and Groq LLM. The system analyzes resumes against job descriptions to
+provide ATS insights such as keyword matching, resume evaluation, and
+match percentage. I handled cloud setup, dependency management, secure
+API key handling, and live deployment."
+
+=====================================================
+END OF WORKFLOW
+=====================================================
